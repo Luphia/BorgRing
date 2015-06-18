@@ -10,6 +10,37 @@ var guid = function() {
 };
 var intToBuffer = function(int) {
 	if(!Number.isFinite(int)) { return false; }
+
+	var length = Math.ceil((Math.log(int)/Math.log(2))/8);
+	var buffer = new Buffer(length);
+	var arr = [];
+
+	while (int > 0) {
+		var temp = int % 2;
+		arr.push(temp);
+		int = Math.floor(int / 2);
+	}
+
+	var counter = 0;
+	var total = 0;
+
+	for (var i = 0, j = arr.length; i < j; i++) {
+		if (counter % 8 == 0 && counter > 0) {
+			buffer[length - 1] = total;
+			total = 0;
+			counter = 0;
+			length--;
+		}
+
+		if (arr[i] == 1) {
+			total += Math.pow(2, counter);
+		}
+		counter++;
+	}
+
+	buffer[0] = total;
+
+	return buffer;
 };
 var XOR = function(buff1, buff2) {
 	if(!util.isBuffer(buff1) || !util.isBuffer(buff2)) { return false; }
