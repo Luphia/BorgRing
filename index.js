@@ -11,7 +11,7 @@ var guid = function() {
 var intToBuffer = function(int) {
 	if(!Number.isFinite(int)) { return false; }
 
-	var length = Math.ceil((Math.log(int)/Math.log(2))/8);
+	var length = Math.ceil((Math.log(int + 1)/Math.log(2))/8);
 	var buffer = new Buffer(length);
 	var arr = [];
 
@@ -40,7 +40,7 @@ var intToBuffer = function(int) {
 
 	buffer[0] = total;
 
-	return buffer;
+	return new Uint8Array[buffer];
 };
 var XOR = function(buff1, buff2) {
 	if(!util.isBuffer(buff1) || !util.isBuffer(buff2)) { return false; }
@@ -54,8 +54,8 @@ var XOR = function(buff1, buff2) {
 };
 var	shuffle = function(arr, n) {
 	if(!Array.isArray(arr)) { return false; }
-	var n = new Buffer( new String(n) );
-	arr.sort(a, b) {
+	var n = new Uint8Array( new Buffer( new String(n) ) );
+	arr.sort(function(a, b) {
 		if(typeof(a) == 'string') {
 			a = rusha.digestFromString(a);
 		}
@@ -63,7 +63,7 @@ var	shuffle = function(arr, n) {
 			a = rusha.digest( intToBuffer(a) );
 		}
 		
-	}
+	});
 };
 
 var BorgRing = function(data) { this.init(data); };
