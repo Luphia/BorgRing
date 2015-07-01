@@ -67,12 +67,15 @@ var	shuffle = function(arr, n) {
 };
 
 var BorgRing = function(data) { this.init(data); };
-BorgRing.sort = sort;
 BorgRing.shuffle = shuffle;
 BorgRing.guid = guid;
 
 BorgRing.prototype.init = function(data) {
 	this.nodes = [];
+};
+
+BorgRing.prototype.addNode = function(node) {
+	this.nodes.push(node);
 };
 
 module.exports = BorgRing;
