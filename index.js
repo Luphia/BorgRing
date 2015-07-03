@@ -1,3 +1,19 @@
+/*
+
+var BR = require('./index.js')
+br = new BR()
+br.addNode('aaa').addNode('bbb').addNode('ccc').addNode('ddd').addNode('eee')
+br.sort()
+
+var n1 = {"ip": "10.10.21.11", "port": "5566"};
+var n2 = {"ip": "10.10.21.12", "port": "5566"};
+br.addNode(n1);
+br.addNode(n2);
+
+br.getNeighbor(n1);
+
+ */
+
 var Rusha = require('rusha');
 
 var rusha = new Rusha();
@@ -42,6 +58,37 @@ var intToBuffer = function(int) {
 
 	return new Uint8Array[buffer];
 };
+var stringToInt = function(str) {
+	var result = 0;
+	for(var i = 0; i < str.length; i++) {
+		result += str.charCodeAt(i) * Math.pow(256, i);
+	}
+
+	return result;
+};
+var bufferConcat = function(buffers) {
+	var result;
+
+	if(Array.isArray(buffers)) {
+		var l = 0;
+		for(var i = 0; i < buffers.length; i++) {
+			l += buffers[i].length;
+		}
+
+		result = new Uint8Array(l);
+
+		for(var i = 0, p = 0; i < buffers.length; i++) {
+			result.set(buffers[i], p);
+			p += buffers[i].length;
+		}
+	}
+	else {
+		result = buffers;
+	}
+
+	return result;
+};
+
 var XOR = function(buff1, buff2) {
 	if(!util.isBuffer(buff1) || !util.isBuffer(buff2)) { return false; }
 	if(buff2.length > buff1.length) { return XOR(buff2, buff1); }
@@ -57,12 +104,29 @@ var	shuffle = function(arr, n) {
 	var n = new Uint8Array( new Buffer( new String(n) ) );
 	arr.sort(function(a, b) {
 		if(typeof(a) == 'string') {
-			a = rusha.digestFromString(a);
+			a = new Uint8Array( new Buffer(a) );
 		}
 		else if(Number.isFinite(a)) {
-			a = rusha.digest( intToBuffer(a) );
+			a = intToBuffer(a);
 		}
-		
+		else if(typeof(a) == 'object') {
+			a = new Uint8Array( new Buffer( JSON.stringify(a) ) );
+		}
+
+		if(typeof(b) == 'string') {
+			b = new Uint8Array( new Buffer(b) );
+		}
+		else if(Number.isFinite(b)) {
+			b = intToBuffer(b);
+		}
+		else if(typeof(b) == 'object') {
+			b = new Uint8Array( new Buffer( JSON.stringify(b) ) );
+		}
+
+		a = rusha.digest( bufferConcat([a, n]) );
+		b = rusha.digest( bufferConcat([b, n]) );
+
+		return stringToInt(a) > stringToInt(b);
 	});
 };
 
@@ -72,10 +136,66 @@ BorgRing.guid = guid;
 
 BorgRing.prototype.init = function(data) {
 	this.nodes = [];
+	this.attr = {};
 };
 
 BorgRing.prototype.addNode = function(node) {
-	this.nodes.push(node);
+	if(!this.exist(node)) {
+		this.nodes.push(node);
+		this.sort(this.attr.sort);
+	}
+
+	return this;
+};
+BorgRing.prototype.removeNode = function(node) {
+	var i = this.indexOf(node);
+	if(i > -1) {
+		this.nodes.splice(i, 1);
+	}
+
+	return this;
+};
+
+BorgRing.prototype.sort = function(n) {
+	this.attr.sort = n;
+	shuffle(this.nodes, n);
+
+	return this;
+};
+
+BorgRing.prototype.exist = function(node) {
+	var rs = this.indexOf(node) > -1;
+	return rs;
+};
+BorgRing.prototype.indexOf = function(node) {
+	var rs = -1;
+	if(typeof(node) == 'object') {
+		for(var i = 0; i < this.nodes.length; i++) {
+			if(JSON.stringify(node) == JSON.stringify(this.nodes[i])) {
+				rs = i;
+				break;
+			}
+		}
+	}
+	else {
+		rs = this.nodes.indexOf(node);
+	}
+
+	return rs;
+};
+
+BorgRing.prototype.getNode = function(n) {
+	if(!(n > -1)) { n = Math.floor( Math.random() * this.nodes.length ); }
+	return this.nodes[n];
+};
+
+BorgRing.prototype.getNeighbor = function(node) {
+	var n = this.indexOf(node);
+	if(n > -1) {
+		n = (n + 1) % this.nodes.length;
+	}
+
+	return this.getNode(n);
 };
 
 module.exports = BorgRing;
