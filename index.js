@@ -2,15 +2,17 @@
 
 var BR = require('./index.js')
 br = new BR()
-br.addNode('aaa').addNode('bbb').addNode('ccc').addNode('ddd').addNode('eee')
-br.sort()
+br.sort(Math.random())
 
 var n1 = {"ip": "10.10.21.11", "port": "5566"};
-var n2 = {"ip": "10.10.21.12", "port": "5566"};
 br.addNode(n1);
-br.addNode(n2);
+for(var i = 1; i < 20; i++) {
+	var node = {"ip": "10.10.21." + (i+11), "port": "5566"};
+	br.addNode(node);
+}
 
 br.getNeighbor(n1);
+br.getNodeList();
 
  */
 
@@ -87,6 +89,20 @@ var bufferConcat = function(buffers) {
 	}
 
 	return result;
+};
+var clone = function(obj) {
+	var rs;
+	if(typeof(obj) == 'object') {
+		rs = Array.isArray(obj)? []: {};
+		for(var k in obj) {
+			rs[k] = clone(obj[k]);
+		}
+	}
+	else {
+		rs = obj;
+	}
+
+	return rs;
 };
 
 var XOR = function(buff1, buff2) {
@@ -187,6 +203,10 @@ BorgRing.prototype.indexOf = function(node) {
 BorgRing.prototype.getNode = function(n) {
 	if(!(n > -1)) { n = Math.floor( Math.random() * this.nodes.length ); }
 	return this.nodes[n];
+};
+
+BorgRing.prototype.getNodeList = function() {
+	return clone(this.nodes);
 };
 
 BorgRing.prototype.getNeighbor = function(node) {
