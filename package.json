@@ -1,6 +1,6 @@
 {
   "name": "borg-ring",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The optimization of transformation paths for large-scale peer-to-peer network",
   "main": "index.js",
   "scripts": {

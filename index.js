@@ -13,6 +13,8 @@ for(var i = 1; i < 20; i++) {
 
 br.getNeighbor(n1);
 br.getNodeList();
+br.find("abc");
+br.find({"some": "content"});
 
  */
 
@@ -216,6 +218,21 @@ BorgRing.prototype.getNeighbor = function(node) {
 	}
 
 	return this.getNode(n);
+};
+
+BorgRing.prototype.find = function(key) {
+	var rs;
+
+	if(typeof(key) == 'string') {
+
+	}
+	else if(typeof(key) == 'object') {
+		key = JSON.stringify(key);
+	}
+	var i = stringToInt(key) % this.nodes.length;
+	rs = this.nodes[i];
+
+	return rs;
 };
 
 module.exports = BorgRing;
